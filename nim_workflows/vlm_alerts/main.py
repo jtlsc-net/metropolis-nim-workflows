@@ -134,7 +134,6 @@ def main(
     flask_server.start_flask()
 
     websocket_server = WebSocketServer(port=websocket_port)
-    websocket_server.run()
 
     # open video file
     cap = cv2.VideoCapture(video_file)

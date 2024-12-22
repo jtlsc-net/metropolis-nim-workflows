@@ -25,9 +25,13 @@ class WebSocketServer:
         self.port = port
         self.clients = set()
         self.loop = asyncio.new_event_loop()
-        self.start_server = websockets.serve(
-            self.handler, self.host, self.port, loop=self.loop
-        )
+
+        
+        def start_loop(loop):
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(websockets.serve(self.handler, self.host, self.port, loop=loop))
+            #loop.run_forever()
+        threading.Thread(target=start_loop, args=(self.loop,)).start()
 
     async def handler(self, websocket, path):
         self.clients.add(websocket)
@@ -46,11 +50,3 @@ class WebSocketServer:
 
     def __call__(self, message):
         asyncio.run_coroutine_threadsafe(self.send_message(message), self.loop)
-
-    def run(self):
-        def start_loop(loop):
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(self.start_server)
-            loop.run_forever()
-
-        threading.Thread(target=start_loop, args=(self.loop,)).start()
